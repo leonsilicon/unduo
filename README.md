@@ -33,10 +33,10 @@ ideology:
 
 ## Install
 
+No install needed — run it with `npx`:
+
 ```bash
-npm install -g unduo
-# or run without installing:
-npx unduo <url>
+npx unduo
 ```
 
 Requires [Node.js](https://nodejs.org) 18+. There are no external binary
@@ -47,25 +47,38 @@ single bundled file.
 
 1. Navigate to your organization's Duo Security portal.
 2. Log in with your current Duo 2FA method.
-3. In the security portal, select **+ Add another device**.
-4. Select **Tablet**.
-5. Select **Android**.
+3. In the Security Portal, select **+ Add another device**.
+
+   ![Add another device](https://raw.githubusercontent.com/leonsilicon/unduo/main/public/setup-1-add-device.png)
+
+4. Select **Tablet**, then **Continue**.
+
+   ![Select Tablet](https://raw.githubusercontent.com/leonsilicon/unduo/main/public/setup-2-tablet.png)
+
+5. Select **Android**, then **Continue**.
+
+   ![Select Android](https://raw.githubusercontent.com/leonsilicon/unduo/main/public/setup-3-android.png)
+
 6. Select **I have Duo Mobile installed**.
-7. Right-click the provided QR code and **copy the image URL** (or read the QR
-   code yourself — its text is in the form `CODE-BASE64HOST`).
-8. Run `unduo` and paste in the URL:
+
+   ![I have Duo Mobile installed](https://raw.githubusercontent.com/leonsilicon/unduo/main/public/setup-4-duo-installed.png)
+
+7. Right-click the provided QR code and select **Copy Image Address** (or read
+   the QR code yourself — its text is in the form `CODE-BASE64HOST`).
+
+   ![Copy the QR code image address](https://raw.githubusercontent.com/leonsilicon/unduo/main/public/setup-5-copy-qr-url.png)
+
+8. Run `unduo` and paste in the value when prompted:
 
    ```bash
-   npx unduo --url 'https://api-12345678.duosecurity.com/frame/qr?value=...'
+   npx unduo
    ```
-
-   (Run `npx unduo` with no `--url` to be prompted for it instead.)
 
 9. Scan the QR code `unduo` prints into your chosen 2FA app. If the app doesn't
    support QR codes, enter the **Key** shown below the QR code manually. The
    `otpauth://` URI is also copied to your clipboard.
-10. Generate and test your first code with `unduo gen`, and you're done. (You
-    can now rename the device in Duo if you like.)
+10. Generate and test your first code with `npx unduo gen`, and you're done.
+    (You can now rename the device in Duo if you like.)
 
 ## Usage
 
@@ -74,12 +87,11 @@ single bundled file.
 Register a virtual device against Duo and store its OTP secret.
 
 ```bash
-unduo --url 'CODE-BASE64HOST'
-# or pass the QR page URL:
-unduo --url 'https://api-12345678.duosecurity.com/frame/qr?value=...'
-# or run with no argument to be prompted:
-unduo
+npx unduo
 ```
+
+`unduo` prompts you to paste in the QR code value (in the form
+`CODE-BASE64HOST`) or the QR page URL.
 
 The secret and activation response are saved to a per-user data directory (see
 [State](#state)). Activation then prints a **QR code to scan**, with the base32
@@ -91,14 +103,14 @@ clipboard tool.)
 ### Generate a code
 
 ```bash
-unduo gen        # prints the current 6-digit TOTP code
-unduo generate   # alias
+npx unduo gen        # prints the current 6-digit TOTP code
+npx unduo generate   # alias
 ```
 
 The bare code is printed to stdout, so it is easy to pipe:
 
 ```bash
-unduo gen | pbcopy
+npx unduo gen | pbcopy
 ```
 
 ### Export to another app
@@ -106,8 +118,8 @@ unduo gen | pbcopy
 Re-print the `otpauth://` QR code (and URI) at any time.
 
 ```bash
-unduo export           # QR code + otpauth URI
-unduo export --no-qr    # only the otpauth URI
+npx unduo export           # QR code + otpauth URI
+npx unduo export --no-qr   # only the otpauth URI
 ```
 
 ## State
@@ -128,7 +140,7 @@ This tool uses [`debug`](https://www.npmjs.com/package/debug). Set `DEBUG` to
 trace the activation URL, the raw Duo API response, and where state is written:
 
 ```bash
-DEBUG='unduo:*' unduo --url 'CODE-BASE64HOST'
+DEBUG='unduo:*' npx unduo
 ```
 
 ## Notes
