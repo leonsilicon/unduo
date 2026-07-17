@@ -5,9 +5,9 @@ Security authentication.**
 
 `unduo` is a command-line tool that lets you use any standard two-factor
 authentication app in place of Cisco's proprietary Duo Mobile software. It
-registers a virtual device with Duo, stores the OTP secret, and hands you a QR
-code (and `otpauth://` URI) you can add to Google Authenticator, FreeOTP,
-Aegis, 1Password, or any other authenticator app.
+registers a virtual device with Duo and hands you a QR code (and `otpauth://`
+URI) you can add to Google Authenticator, Authy, or any other authenticator
+app.
 
 ## Is it secure?
 
@@ -74,31 +74,40 @@ single bundled file.
    npx unduo
    ```
 
-9. Scan the QR code `unduo` prints into your chosen 2FA app. If the app doesn't
-   support QR codes, enter the **Key** shown below the QR code manually. The
-   `otpauth://` URI is also copied to your clipboard.
-10. Generate and test your first code with `npx unduo gen`, and you're done.
-    (You can now rename the device in Duo if you like.)
+9. Scan the QR code `unduo` prints into a 2FA app such as Google Authenticator
+   or Authy. If the app doesn't support QR codes, enter the **Key** shown below
+   the QR code manually. The `otpauth://` URI is also copied to your clipboard.
+   You can also rename the device in Duo if you like.
 
 ## Usage
 
 ### Activate (the root command)
 
-Register a virtual device against Duo and store its OTP secret.
+Register a virtual device against Duo and print its OTP secret.
 
 ```bash
-npx unduo
+npx unduo          # print only — nothing is written to disk
+npx unduo --save   # also persist the secret for `gen`/`export`
 ```
 
 `unduo` prompts you to paste in the QR code value (in the form
-`CODE-BASE64HOST`) or the QR page URL.
+`CODE-BASE64HOST`) or the QR page URL. It then prints a **QR code to scan**,
+with the base32 **key** and the `otpauth://` **URI** as plain text underneath —
+and copies that URI to your clipboard, so you can add the account to any 2FA app
+right away. (The clipboard copy is skipped silently in headless environments
+with no clipboard tool.)
 
-The secret and activation response are saved to a per-user data directory (see
-[State](#state)). Activation then prints a **QR code to scan**, with the base32
-**key** and the `otpauth://` **URI** as plain text underneath — and copies that
-URI to your clipboard, so you can add the account to any 2FA app right away.
-(The clipboard copy is skipped silently in headless environments with no
-clipboard tool.)
+By default **nothing is written to disk** — the secret only lives in your 2FA
+app. Pass `--save` to also store the secret and activation response in a
+per-user data directory (see [State](#state)); this is what lets the `gen` and
+`export` commands work later.
+
+> **`--save` is discouraged.** It writes your OTP secret to a plaintext file on
+> disk. You're better off adding the account to a 2FA app such as Google
+> Authenticator or Authy straight from the printed QR code / `otpauth://` URI —
+> it stays encrypted, syncs across your devices, and can autofill codes for you.
+> Only reach for `--save` if you specifically want the built-in `gen`/`export`
+> commands on a machine you trust.
 
 ### Generate a code
 
@@ -124,8 +133,9 @@ npx unduo export --no-qr   # only the otpauth URI
 
 ## State
 
-Activation writes two files — the base32 `secret` and the `response.json` —
-which `gen` and `export` read back. The location is resolved in this order:
+By default `unduo` never touches disk. Only `npx unduo --save` writes state:
+two files — the base32 `secret` and the `response.json` — which `gen` and
+`export` read back. The location is resolved in this order:
 
 1. the `--dir <path>` flag,
 2. the `$UNDUO_DIR` environment variable,
@@ -134,10 +144,16 @@ which `gen` and `export` read back. The location is resolved in this order:
    `~/Library/Application Support/unduo` on macOS or `~/.local/share/unduo` on
    Linux.
 
+`gen` and `export` require a saved secret, so they only work after an
+`npx unduo --save` activation. Because that file is plaintext, prefer keeping
+the secret in a 2FA app such as Google Authenticator or Authy instead — see the
+note under [Activate](#activate-the-root-command).
+
 ## Debug output
 
 This tool uses [`debug`](https://www.npmjs.com/package/debug). Set `DEBUG` to
-trace the activation URL, the raw Duo API response, and where state is written:
+trace the activation URL, the raw Duo API response, and (with `--save`) where
+state is written:
 
 ```bash
 DEBUG='unduo:*' npx unduo

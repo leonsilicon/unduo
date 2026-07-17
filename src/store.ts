@@ -49,7 +49,7 @@ export async function saveActivation(
 export async function loadSecret(dir: string): Promise<string> {
   const secret = await createStore(dir).getItem<string>(SECRET_KEY);
   if (secret === null) {
-    throw new Error(`No activation secret found in ${dir}. Run \`unduo activate\` first.`);
+    throw new Error(`No activation secret found in ${dir}. Run \`unduo --save\` first.`);
   }
   return secret.trim();
 }
@@ -58,7 +58,7 @@ export async function loadSecret(dir: string): Promise<string> {
 export async function loadResponse(dir: string): Promise<DuoResponse> {
   const response = await createStore(dir).getItem<DuoResponse>(RESPONSE_KEY);
   if (response === null) {
-    throw new Error(`No activation response found in ${dir}. Run \`unduo activate\` first.`);
+    throw new Error(`No activation response found in ${dir}. Run \`unduo --save\` first.`);
   }
   return response;
 }

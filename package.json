@@ -1,6 +1,6 @@
 {
   "name": "unduo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Un-Duo yourself by making it possible to use any 2FA application for Duo Security authentication.",
   "keywords": [
     "2fa",

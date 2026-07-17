@@ -81,6 +81,12 @@ const main = defineCommand({
       type: "string",
       description: "The DUO QR code value or activation URL. Prompts if omitted.",
     },
+    save: {
+      type: "boolean",
+      description:
+        "Persist the secret to the data dir so `gen`/`export` can reuse it. Off by default.",
+      default: false,
+    },
     ...dirArg,
   },
   subCommands,
@@ -99,8 +105,12 @@ const main = defineCommand({
     const activationValue = await resolveActivationValue(input);
     const activation = await activateDevice(activationValue);
 
-    const dir = resolveStoreDir(args.dir);
-    await saveActivation(dir, activation.secret, activation.response);
+    // Only persist the secret when the user explicitly opts in with `--save`.
+    if (args.save) {
+      const dir = resolveStoreDir(args.dir);
+      await saveActivation(dir, activation.secret, activation.response);
+      debug("saved activation state to %s", dir);
+    }
 
     const uri = buildExportUri(activation.response);
     // Padding-stripped base32 key, matching what authenticator apps expect.
@@ -116,7 +126,9 @@ const main = defineCommand({
     }
 
     consola.success(`Activated for ${activation.customer}`);
-    consola.info(`Secret stored in ${dir}`);
+    if (args.save) {
+      consola.info(`Secret stored in ${resolveStoreDir(args.dir)}`);
+    }
 
     // Show the QR code and invite the user to scan it.
     consola.log("\nScan this QR code with your authenticator app:");
@@ -127,6 +139,11 @@ const main = defineCommand({
     consola.log(`otpauth:  ${uri}`);
     if (copied) {
       consola.log("\nCopied the otpauth URI to your clipboard.");
+    }
+    if (!args.save) {
+      consola.log(
+        "\nThe secret was not saved. Re-run with `--save` if you want `unduo gen`/`export` to reuse it.",
+      );
     }
   },
 });
